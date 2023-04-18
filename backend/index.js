@@ -16,6 +16,30 @@ dotenv.config({ path: "config.env" });
 
 const jwtkey = process.env.JWT_SECRET_KEY;
 
+/////session/////
+const session = require("express-session");
+const MongoDBstore = require("connect-mongodb-session")(session);
+console.log(MongoDBstore);
+const store = new MongoDBstore({
+  uri: "mongodb://localhost:27017/e-commerce",
+  collection: "sessions",
+});
+app.use(
+  session({
+    secret: "my secret",
+    resave: false,
+
+    saveUninitialized: false,
+    store: store,
+  })
+);
+/////session/////
+
+////cookies///
+var cookieParser = require("cookie-parser");
+app.use(cookieParser());
+/////
+
 app.post("/register", async (req, res) => {
   // let resultp = await User.findOne(JSON.parse(req.body.email));
   // console.log(resultp);
@@ -33,11 +57,14 @@ app.post("/register", async (req, res) => {
       }
     });
   } else {
-    res.send({ msg: "No result found" });
+    res.send({ msg: "something went wrong" });
   }
 });
 app.post("/login", async (req, res) => {
   let result = await User.findOne(req.body).select("-password");
+  // req.session.isloggedIn = true;
+
+  // res.setHeader("Set-Cookie", "loggiedIn=true");
 
   if (result) {
     jwt.sign({ result }, jwtkey, { expiresIn: "2h" }, (err, token) => {
@@ -48,6 +75,9 @@ app.post("/login", async (req, res) => {
         console.log(jwtkey);
       }
     });
+    var randomNumber = Math.random().toString();
+    res.cookie("cookieName", randomNumber, { maxAge: 900000, httpOnly: true });
+    req.session.userEmail = result.email;
   } else {
     res.send({ msg: "No result found" });
   }
@@ -122,3 +152,19 @@ function verifytoken(req, res, next) {
     res.send({ msg: "Please provide valid token" });
   }
 }
+
+app.get("/setcookies", async (req, res) => {
+  // res.setHeader("Set-Cookie", "newuser=true");
+  // res.cookie("newuser", false, { maxAge: 1000 * 24, secure: true });
+
+  res.cookie("newuser", false, { maxAge: 1000 * 24, httpOnly: true });
+  res.send("setting cookies");
+});
+
+app.get("/readcookies", async (req, res) => {
+  // res.setHeader("Set-Cookie", "newuser=true");
+  // res.cookie("newuser", false, { maxAge: 1000 * 24, secure: true });
+
+  const cookies = req.cookies;
+  console.log(cookies.newuser);
+});
