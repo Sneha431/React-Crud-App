@@ -13,7 +13,14 @@ import PrivateComponent from "./components/PrivateComponent";
 import AddProduct from "./components/Products/AddProduct";
 import ProductList from "./components/Products/ProductList";
 import UpdateProduct from "./components/Products/UpdateProduct";
-
+import ProductListUser from "./components/Products/ProductListUser";
+import PasswordResset from "./components/PasswordResset";
+const USER_TYPES = {
+  PUBLIC_USER: "Public User",
+  NORMAL_USER: "Normal User",
+  ADMIN_USER: "Admin User",
+};
+const CURRENT_USER_TYPE = USER_TYPES.NORMAL_USER;
 function App() {
   return (
     <div className="App">
@@ -52,14 +59,37 @@ function App() {
                 </>
               }
             />
-            <Route path="/logout" element={<h1>Logout</h1>} />
+
             <Route path="/profile" element={<h1>Profile</h1>} />
-            <Route path="/products" element={<h1>Profile</h1>} />
           </Route>
+          <Route
+            path="/dashboard"
+            element={
+              <UserElement>
+                <ProductListUser />
+              </UserElement>
+            }
+          />
+          <Route path="/forgetpassword" element={<PasswordResset />} />
         </Routes>
       </BrowserRouter>
     </div>
   );
+
+  function UserElement({ children }) {
+    if (
+      CURRENT_USER_TYPE === USER_TYPES.ADMIN_USER ||
+      CURRENT_USER_TYPE === USER_TYPES.NORMAL_USER
+    ) {
+      return <>{children}</>;
+    } else {
+      return (
+        <>
+          <Login />
+        </>
+      );
+    }
+  }
 }
 
 export default App;

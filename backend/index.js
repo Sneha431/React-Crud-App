@@ -1,11 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 require("./db/config");
-
+const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
 // const path = require("path");
 const app = express();
 app.use(express.json());
 app.use(cors());
+
 const User = require("./db/User");
 const Products = require("./db/Product");
 
@@ -27,9 +29,9 @@ const store = new MongoDBstore({
 app.use(
   session({
     secret: "my secret",
-    resave: false,
+    resave: true,
 
-    saveUninitialized: false,
+    saveUninitialized: true,
     store: store,
   })
 );
@@ -37,59 +39,135 @@ app.use(
 
 ////cookies///
 var cookieParser = require("cookie-parser");
+
 app.use(cookieParser());
 /////
 
 app.post("/register", async (req, res) => {
   // let resultp = await User.findOne(JSON.parse(req.body.email));
   // console.log(resultp);
-  let user = new User(req.body);
-  let result = await user.save();
 
-  result = result.toObject();
-  delete result.password;
-  if (result) {
-    jwt.sign({ result }, jwtkey, { expiresIn: "2h" }, (err, token) => {
-      if (err) {
-        res.send({ msg: "something went wrong" });
-      } else {
-        res.send({ result, auth: token });
-      }
-    });
+  let resultemail = await User.findOne({ email: req.body.email });
+  if (resultemail) {
+    res.send({ msg: "Email ID already exists" });
+  } else {
+    const salt = await bcrypt.genSalt(10);
+    const passwordupdated = await bcrypt.hash(req.body.password, salt);
+    let updated_body = {
+      name: req.body.name,
+      email: req.body.email,
+      password: passwordupdated,
+    };
+    let user = new User(updated_body);
+    let result = await user.save();
+    result = result.toObject();
+    delete result.password;
+    if (result) {
+      jwt.sign({ result }, jwtkey, { expiresIn: "2h" }, (err, token) => {
+        if (err) {
+          res.send({ msg: "something went wrong" });
+        } else {
+          res.send({ result, auth: token });
+        }
+      });
+    } else {
+      res.send({ msg: "something went wrong" });
+    }
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const salt = await bcrypt.genSalt(10);
+  let resultemail = await User.find({ email: req.body.email });
+
+  let valuesArray = Object.values(resultemail);
+
+  if (valuesArray.length) {
+    for (let value of valuesArray) {
+      const data = value.password;
+
+      bcrypt.compare(req.body.password, data).then(function (result) {
+        let userId = value._id;
+        console.log("result" + result);
+        if (result) {
+          jwt.sign({ result }, jwtkey, { expiresIn: "2h" }, (err, token) => {
+            if (err) {
+              res.send({ msg: "something went wrong" });
+            } else {
+              res.send({ result, auth: token, userId: userId });
+
+              // res.cookie("id", result._id, { maxAge: 1000 * 24, httpOnly: true });
+              // res.setHeader("Set-Cookie", result._id);
+            }
+          });
+        } else {
+          res.send({ msg: "something went wrong" });
+        }
+      });
+    }
   } else {
     res.send({ msg: "something went wrong" });
   }
+
+  //  ["The name is Balaji", "The age is 23"]
+  // let result = bcrypt.compareSync(req.body.password, hash);
+  // console.log(result)
+  // if (result) {
+  //   jwt.sign({ result }, jwtkey, { expiresIn: "2h" }, (err, token) => {
+  //     if (err) {
+  //       res.send({ msg: "something went wrong" });
+  //     } else {
+  //       res.send({ result, auth: token });
+
+  //       // res.cookie("id", result._id, { maxAge: 1000 * 24, httpOnly: true });
+  //       // res.setHeader("Set-Cookie", result._id);
+  //     }
+  //   });
+  // var randomNumber = Math.random().toString();
+  // res.cookie("cookieName", randomNumber, { maxAge: 900000, httpOnly: true });
+  // req.session.userid = result._id.valueOf();
+  // req.session.userEmail = result.email;
+  // } else {
+  //   res.send({ msg: "No result found" });
+  // }
 });
-app.post("/login", async (req, res) => {
-  let result = await User.findOne(req.body).select("-password");
-  // req.session.isloggedIn = true;
 
-  // res.setHeader("Set-Cookie", "loggiedIn=true");
+app.put("/forgetpassword", async (req, res) => {
+  let updatedpass = {
+    password: req.body.newpassword,
+  };
 
-  if (result) {
-    jwt.sign({ result }, jwtkey, { expiresIn: "2h" }, (err, token) => {
-      if (err) {
-        res.send({ msg: "something went wrong" });
-      } else {
-        res.send({ result, auth: token });
-        console.log(jwtkey);
-      }
-    });
-    var randomNumber = Math.random().toString();
-    res.cookie("cookieName", randomNumber, { maxAge: 900000, httpOnly: true });
-    req.session.userEmail = result.email;
+  let result = await User.updateOne(
+    { email: req.body.email, password: req.body.password },
+    { $set: updatedpass }
+  );
+
+  if (result.modifiedCount === 1) {
+    res.send(result.acknowledged);
   } else {
     res.send({ msg: "No result found" });
   }
 });
+
 app.post("/add-product", verifytoken, async (req, res) => {
-  console.log(req.body);
   let product = new Products(req.body);
   let result = await product.save();
   res.send(result);
 });
-app.get("/products", verifytoken, async (req, res) => {
-  let products = await Products.find();
+// app.get("/products", verifytoken, async (req, res) => {
+//   let products = await Products.find();
+
+//   if (products.length > 0) {
+//     res.send(products);
+//   } else {
+//     res.send({ result: "No Products Found" });
+//   }
+// });
+
+app.get("/products/:userid", verifytoken, async (req, res) => {
+  let userId = req.params.userid;
+  console.log(userId);
+  let products = await Products.find({ userId: userId });
   if (products.length > 0) {
     res.send(products);
   } else {
@@ -115,7 +193,7 @@ app.get("/product/:id", verifytoken, async (req, res) => {
 });
 app.put("/update/:id", verifytoken, async (req, res) => {
   let product = req.body;
-  console.log(req.body);
+  // console.log(req.body);
   let result = await Products.updateOne(
     { _id: req.params.id },
     { $set: product }
@@ -167,4 +245,36 @@ app.get("/readcookies", async (req, res) => {
 
   const cookies = req.cookies;
   console.log(cookies.newuser);
+});
+
+/////for outside public///
+app.get("/allproduct", async (req, res) => {
+  let products = await Products.find();
+  if (products) {
+    res.send(products);
+  } else {
+    res.send({ msg: "No result found" });
+  }
+});
+
+app.get("/sendmail", async (req, res) => {
+  //   let testAccount = await nodemailer.createTestAccount();
+  let transporter = nodemailer.createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: "carlotta82@ethereal.email",
+      pass: "JSrPfwrBqp6kZF8H1y",
+    },
+  });
+  let info = await transporter.sendMail({
+    from: '"Sneha Goswami" <snehagoswami431@gmail.com>', // sender address
+    to: "snehagoswami431@gmail.com", // list of receivers
+    subject: "Hello Nodemailer", // Subject line
+    text: "Hello world?", // plain text body
+    html: "<b>Hello world?</b>", // html body
+  });
+  console.log("Message sent: %s", info.messageId);
+  res.json(info);
 });

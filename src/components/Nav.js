@@ -14,20 +14,7 @@ const Nav = () => {
     localStorage.removeItem("user");
     navigate("/login");
   };
-  useEffect(() => {
-    getProducts();
-  });
-  const getProducts = async () => {
-    const result = await fetch("http://localhost:5000/products", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: `bearer ${JSON.parse(localStorage.getItem("auth"))}`,
-      },
-    });
-    const json = await result.json();
-    setproducts(json);
-  };
+
   const navigate = useNavigate(); //use to re-render the comp, if any changes found in navigation
 
   return (
@@ -73,7 +60,9 @@ const Nav = () => {
             <li className="nav-item">
               <Link className="nav-link" to="/">
                 <i className="fa fa-bell">
-                  <span className="badge badge-info">{products.length}</span>
+                  <span className="badge badge-info">
+                    {localStorage.getItem("productlength")}
+                  </span>
                 </i>
                 Products
               </Link>

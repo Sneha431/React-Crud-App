@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from "react";
+import ReactPaginate from "react-paginate";
 import { Link } from "react-router-dom";
 
 const ProductList = () => {
+  const [offset, setOffset] = useState(0);
+  const [index, setindex] = useState(0);
+
+  const [perPage] = useState(2);
+  const [pageCount, setPageCount] = useState(0);
   const [products, setproducts] = useState([]);
   useEffect(() => {
     getProducts();
     // localStorage.setItem("prodCount", products.length);
-  }, []);
+  }, [offset]);
   const getProducts = async () => {
-    const result = await fetch("http://localhost:5000/products", {
+    let userid = JSON.parse(localStorage.getItem("user"));
+
+    const result = await fetch(`http://localhost:5000/products/${userid}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -16,8 +24,10 @@ const ProductList = () => {
       },
     });
     const json = await result.json();
-
-    setproducts(json);
+    localStorage.setItem("productlength", json.length);
+    const slice = json.slice(offset, offset + perPage);
+    setproducts(slice);
+    setPageCount(Math.ceil(json.length / perPage));
   };
   const deleteproduct = async (id) => {
     console.log(id);
@@ -47,7 +57,11 @@ const ProductList = () => {
       setproducts(r);
     }
   };
-
+  const handlePageClick = (e) => {
+    const selectedPage = e.selected;
+    console.log(selectedPage);
+    setOffset(selectedPage + 1);
+  };
   return (
     <div className="container">
       <div className="table-wrapper">
@@ -62,7 +76,6 @@ const ProductList = () => {
         <table className="fl-table">
           <thead>
             <tr>
-              <th>#</th>
               <th>Name</th>
               <th>Price</th>
               <th>Category</th>
@@ -74,7 +87,6 @@ const ProductList = () => {
             {products.length > 0 ? (
               products.map((item, index) => (
                 <tr key={index}>
-                  <td>{index + 1}</td>
                   <td>{item.name}</td>
                   <td>${item.price}</td>
                   <td>{item.category}</td>
@@ -95,10 +107,25 @@ const ProductList = () => {
                 </tr>
               ))
             ) : (
-              <span className="text-center">No Result Found</span>
+              <tr>
+                <td className="text-center">No Result Found</td>
+              </tr>
             )}
           </tbody>
         </table>
+        <ReactPaginate
+          previousLabel={"prev"}
+          nextLabel={"next"}
+          breakLabel={"..."}
+          breakClassName={"break-me"}
+          pageCount={pageCount}
+          marginPagesDisplayed={2}
+          pageRangeDisplayed={5}
+          onPageChange={handlePageClick}
+          containerClassName={"pagination"}
+          subContainerClassName={"pages pagination"}
+          activeClassName={"active"}
+        />
       </div>
     </div>
   );

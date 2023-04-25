@@ -46,10 +46,10 @@ const SignUp = () => {
       if (json.auth) {
         localStorage.setItem("user", JSON.stringify(json.result));
         localStorage.setItem("auth", JSON.stringify(json.auth));
-
-        navigate("/");
+        setalertmsg("Alert : Account created successfully");
+        setalerttype("success");
       } else {
-        setalertmsg("Alert :Something went wrong");
+        setalertmsg("Alert :" + json.msg);
         setalerttype("danger");
       }
     }
@@ -127,7 +127,7 @@ const SignUp = () => {
     <>
       <Alert propscontent={{ msg: alertmsg, type: alertype }} />
       <div className="container">
-        <div className="screen">
+        <div className="screen" style={{ height: "690px" }}>
           <div className="screen__content">
             <form className="signup">
               <div className="login__field">
