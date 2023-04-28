@@ -10,7 +10,7 @@ app.use(cors());
 
 const User = require("./db/User");
 const Products = require("./db/Product");
-
+const Cartdata = require("./db/Cartdata");
 // Set up Global configuration access
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
@@ -57,6 +57,7 @@ app.post("/register", async (req, res) => {
       name: req.body.name,
       email: req.body.email,
       password: passwordupdated,
+      role: "user",
     };
     let user = new User(updated_body);
     let result = await user.save();
@@ -77,7 +78,6 @@ app.post("/register", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  const salt = await bcrypt.genSalt(10);
   let resultemail = await User.find({ email: req.body.email });
 
   let valuesArray = Object.values(resultemail);
@@ -88,18 +88,36 @@ app.post("/login", async (req, res) => {
 
       bcrypt.compare(req.body.password, data).then(function (result) {
         let userId = value._id;
+        let username = value.name;
+        let role = value.role;
+
         console.log("result" + result);
         if (result) {
-          jwt.sign({ result }, jwtkey, { expiresIn: "2h" }, (err, token) => {
-            if (err) {
-              res.send({ msg: "something went wrong" });
-            } else {
-              res.send({ result, auth: token, userId: userId });
+          let updated_result = {
+            id: userId,
+            name: username,
+            email: value.email,
 
-              // res.cookie("id", result._id, { maxAge: 1000 * 24, httpOnly: true });
-              // res.setHeader("Set-Cookie", result._id);
+            role: value.role,
+          };
+          jwt.sign(
+            { updated_result },
+            jwtkey,
+            { expiresIn: "2h" },
+            (err, token) => {
+              if (err) {
+                res.send({ msg: "something went wrong" });
+              } else {
+                res.send({
+                  result,
+                  auth: token,
+                });
+
+                // res.cookie("id", result._id, { maxAge: 1000 * 24, httpOnly: true });
+                // res.setHeader("Set-Cookie", result._id);
+              }
             }
-          });
+          );
         } else {
           res.send({ msg: "something went wrong" });
         }
@@ -133,19 +151,34 @@ app.post("/login", async (req, res) => {
 });
 
 app.put("/forgetpassword", async (req, res) => {
-  let updatedpass = {
-    password: req.body.newpassword,
-  };
+  let result = await User.findOne({ email: req.body.email });
+  if (result) {
+    bcrypt
+      .compare(req.body.password, result.password)
+      .then(async function (resultdata) {
+        const salt = await bcrypt.genSalt(10);
+        const passwordupdated = await bcrypt.hash(req.body.newpassword, salt);
+        let updatedpass = {
+          password: passwordupdated,
+        };
 
-  let result = await User.updateOne(
-    { email: req.body.email, password: req.body.password },
-    { $set: updatedpass }
-  );
-
-  if (result.modifiedCount === 1) {
-    res.send(result.acknowledged);
+        if (resultdata) {
+          let resultupdated = await User.updateOne(
+            { email: req.body.email, password: result.password },
+            { $set: updatedpass }
+          );
+          console.log(resultupdated);
+          if (resultupdated.modifiedCount === 1) {
+            res.send({ acknowledged: resultupdated.acknowledged });
+          } else {
+            res.send({ acknowledged: resultupdated.acknowledged });
+          }
+        } else {
+          res.send({ acknowledged: false });
+        }
+      });
   } else {
-    res.send({ msg: "No result found" });
+    res.send({ acknowledged: false });
   }
 });
 
@@ -191,6 +224,7 @@ app.get("/product/:id", verifytoken, async (req, res) => {
     res.send({ msg: "No result found" });
   }
 });
+
 app.put("/update/:id", verifytoken, async (req, res) => {
   let product = req.body;
   // console.log(req.body);
@@ -277,4 +311,31 @@ app.get("/sendmail", async (req, res) => {
   });
   console.log("Message sent: %s", info.messageId);
   res.json(info);
+});
+
+////cart////
+app.post("/addtocart", verifytoken, async (req, res) => {
+  let resultemail = await Cartdata.findOne({
+    name: req.body.name,
+    price: req.body.price,
+    category: req.body.category,
+    company: req.body.company,
+  });
+  if (!resultemail) {
+    let cartdata = new Cartdata(req.body);
+    let result = await cartdata.save();
+    res.send(result);
+  } else {
+    res.send({ msg: "Item already added in the cart" });
+  }
+});
+app.get("/getcartdata/:userid", verifytoken, async (req, res) => {
+  let userId = req.params.userid;
+  console.log(userId);
+  let cartdata = await Cartdata.find({ userId: userId });
+  if (cartdata.length > 0) {
+    res.send(cartdata);
+  } else {
+    res.send({ result: "No Products Found" });
+  }
 });

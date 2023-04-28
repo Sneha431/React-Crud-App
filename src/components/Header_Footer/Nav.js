@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../assets/img/images.png";
+import jwt_decode from "jwt-decode";
+import logo from "../../assets/img/images.png";
 const Nav = () => {
   const [visible, setVisible] = useState(false);
   const [products, setproducts] = useState([]);
@@ -8,10 +9,14 @@ const Nav = () => {
     setVisible(!visible);
   };
   const auth = localStorage.getItem("auth");
-  const user = localStorage.getItem("user");
+  let decoded = jwt_decode(localStorage.getItem("auth"));
+  console.log("nav" + decoded.updated_result);
+  const user = decoded.updated_result.id;
+  const username = decoded.updated_result.name;
+  const role = decoded.updated_result.role;
   const logout = () => {
     localStorage.removeItem("auth");
-    localStorage.removeItem("user");
+
     navigate("/login");
   };
 
@@ -57,32 +62,49 @@ const Nav = () => {
             </li>
           </ul>
           <ul className="navbar-nav ">
-            <li className="nav-item">
-              <Link className="nav-link" to="/">
-                <i className="fa fa-bell">
-                  <span className="badge badge-info">
-                    {localStorage.getItem("productlength")}
-                  </span>
-                </i>
-                Products
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/add">
-                <i className="fa fa-plus">
-                  {/* <span className="badge badge-info">11</span> */}
-                </i>
-                Add Products
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/">
-                <i className="fa fa-refresh">
-                  {/* <span className="badge badge-info">11</span> */}
-                </i>
-                Update Products
-              </Link>
-            </li>
+            {role === "admin" ? (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/">
+                    <i className="fa fa-bell">
+                      <span className="badge badge-info">
+                        {localStorage.getItem("productlength")}
+                      </span>
+                    </i>
+                    Products
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/add">
+                    <i className="fa fa-plus">
+                      {/* <span className="badge badge-info">11</span> */}
+                    </i>
+                    Add Products
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/">
+                    <i className="fa fa-refresh">
+                      {/* <span className="badge badge-info">11</span> */}
+                    </i>
+                    Update Products
+                  </Link>
+                </li>
+              </>
+            ) : (
+              <>
+                {" "}
+                <li className="nav-item">
+                  <Link className="nav-link" to="/">
+                    <i className="fa fa-bell">
+                      <span className="badge badge-info"></span>
+                    </i>
+                    Cart
+                  </Link>
+                </li>
+              </>
+            )}
+
             <li className="nav-item">
               {user ? (
                 <Link className="nav-link" onClick={logout} to="/login">
@@ -113,7 +135,7 @@ const Nav = () => {
                   <i className="fa fa-user">
                     {/* <span className="badge badge-success">11</span> */}
                   </i>
-                  {JSON.parse(user).name}
+                  {username}
                 </Link>
               </li>
             )}

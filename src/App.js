@@ -1,20 +1,25 @@
 import "./App.css";
-import Nav from "./components/Nav";
+
 import "./assets/css/nav.css";
+import "./assets/css/cart.css";
 import "./assets/css/footer.css";
 import "./assets/css/login.css";
 import "./assets/css/add_product.css";
 import "./assets/css/productlist.css";
+import "./assets/css/cartpage.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Footer from "./components/Footer";
-import Login from "./components/Login";
-import SignUp from "./components/SignUp";
+import Nav from "./components/Header_Footer/Nav";
+import Footer from "./components/Header_Footer/Footer";
+import Login from "./components/Login_Signup/Login";
+import SignUp from "./components/Login_Signup/SignUp";
 import PrivateComponent from "./components/PrivateComponent";
-import AddProduct from "./components/Products/AddProduct";
-import ProductList from "./components/Products/ProductList";
-import UpdateProduct from "./components/Products/UpdateProduct";
-import ProductListUser from "./components/Products/ProductListUser";
-import PasswordResset from "./components/PasswordResset";
+import AddProduct from "./components/Admin/Products/AddProduct";
+import ProductList from "./components/Admin/Products/ProductList";
+import UpdateProduct from "./components/Admin/Products/UpdateProduct";
+
+import PasswordResset from "./components/Login_Signup/PasswordResset";
+import ViewProduct from "./components/User/ViewProduct";
+import CartItem from "./components/User/CartItem";
 const USER_TYPES = {
   PUBLIC_USER: "Public User",
   NORMAL_USER: "Normal User",
@@ -35,6 +40,16 @@ function App() {
                 <>
                   <Nav />
                   <ProductList />
+                  <Footer />
+                </>
+              }
+            />
+            <Route
+              path="/shoppingcart"
+              element={
+                <>
+                  <Nav />
+                  <CartItem />
                   <Footer />
                 </>
               }
@@ -66,11 +81,21 @@ function App() {
             path="/dashboard"
             element={
               <UserElement>
-                <ProductListUser />
+                <ProductList />
               </UserElement>
             }
           />
           <Route path="/forgetpassword" element={<PasswordResset />} />
+          <Route
+            path="/viewproduct/:id"
+            element={
+              <>
+                <Nav />
+                <ViewProduct />
+                <Footer />
+              </>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </div>

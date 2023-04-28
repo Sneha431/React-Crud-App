@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Alert from "./Alert";
+import Alert from "../commonComponents/Alert";
 const Login = () => {
   const [password, setpassword] = useState("");
   const [email, setemail] = useState("");
@@ -10,6 +10,7 @@ const Login = () => {
   const [error, seterror] = useState("");
   const [errorpass, seterrorpass] = useState("");
   const navigate = useNavigate();
+
   const submitdatalogin = async (e) => {
     e.preventDefault();
 
@@ -23,11 +24,10 @@ const Login = () => {
       });
 
       const json = await result.json();
-      console.log(json);
 
       if (json.result === true) {
-        localStorage.setItem("user", JSON.stringify(json.userId));
         localStorage.setItem("auth", JSON.stringify(json.auth));
+
         navigate("/");
       } else {
         //alert("Enter correct details");
@@ -40,13 +40,13 @@ const Login = () => {
     setalertmsg("");
     setalerttype("");
   }, 8000);
-  useEffect(() => {
-    const auth = localStorage.getItem("auth");
+  // useEffect(() => {
+  //   const auth = localStorage.getItem("auth");
 
-    if (auth) {
-      navigate("/login");
-    }
-  }, []);
+  //   if (auth) {
+  //     navigate("/login");
+  //   }
+  // }, []);
 
   const changevisibility = () => {
     setpassvisible(!passvisible);
@@ -89,6 +89,7 @@ const Login = () => {
   return (
     <>
       <Alert propscontent={{ msg: alertmsg, type: alertype }} />
+
       <div className="container">
         <div className="screen">
           <div className="screen__content">

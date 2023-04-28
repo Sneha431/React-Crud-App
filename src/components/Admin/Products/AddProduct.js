@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode";
 const AddProduct = () => {
   const [name, setname] = useState("");
   const [price, setprice] = useState("");
   const [category, setcategory] = useState("");
   const [company, setcompany] = useState("");
   const [error, seterror] = useState(false);
+
   const navigate = useNavigate();
   const addProduct = async (e) => {
     e.preventDefault();
@@ -15,7 +17,10 @@ const AddProduct = () => {
     } else {
       seterror(false);
     }
-    const userId = JSON.parse(localStorage.getItem("user"))._id;
+
+    let decoded = jwt_decode(localStorage.getItem("auth"));
+
+    const userId = decoded.updated_result.id;
 
     const result = await fetch("http://localhost:5000/add-product", {
       method: "POST",

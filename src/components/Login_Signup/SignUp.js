@@ -1,66 +1,93 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Alert from "./Alert";
-const PasswordResset = () => {
+import Alert from "../commonComponents/Alert";
+
+const SignUp = () => {
+  const [firstname, setfirstname] = useState("");
+  const [lastname, setlastname] = useState("");
   const [password, setpassword] = useState("");
-  const [newpassword, setnewpassword] = useState("");
+
   const [email, setemail] = useState("");
-  const [passvisible, setpassvisible] = useState(false);
-  const [passvisiblenew, setpassvisiblenew] = useState(false);
+  const [errorfname, seterrorfname] = useState("");
+  const [errorlname, seterrorlname] = useState("");
+  const [erroremail, seterroremail] = useState("");
+  const [errorpass, seterrorpass] = useState("");
+  const [errorconfirmpass, seterrorconfirmpass] = useState("");
   const [alertmsg, setalertmsg] = useState("");
   const [alertype, setalerttype] = useState("");
-  const [error, seterror] = useState("");
-  const [errorpass, seterrorpass] = useState("");
-  const [errorpassnew, seterrorpassnew] = useState("");
   const navigate = useNavigate();
-  const submitdatalogin = async (e) => {
+  useEffect(() => {
+    const auth = localStorage.getItem("user");
+    if (auth) {
+      navigate("/");
+    }
+  }, []);
+  const submitdata = async (e) => {
     e.preventDefault();
-
-    if (error === "" && errorpass === "" && errorpassnew === "") {
-      let result = await fetch("http://localhost:5000/forgetpassword", {
-        method: "PUT",
-        body: JSON.stringify({ email, password, newpassword }),
+    let name = firstname + " " + lastname;
+    if (
+      errorconfirmpass !== "" ||
+      errorpass !== "" ||
+      erroremail !== "" ||
+      errorfname !== "" ||
+      errorlname !== ""
+    ) {
+      return false;
+    } else {
+      const result = await fetch("http://localhost:5000/register", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ name, email, password }),
       });
-
       const json = await result.json();
-      console.log(json);
 
-      if (json === true) {
-        setalertmsg("Alert : Password Reset Successfully");
+      if (json.auth) {
+        localStorage.setItem("auth", JSON.stringify(json.auth));
+        setalertmsg("Alert : Account created successfully");
         setalerttype("success");
-      } else if (json.msg !== "") {
-        //alert("Enter correct details");
-        setalertmsg("Alert : Enter correct details");
+      } else {
+        setalertmsg("Alert :" + json.msg);
         setalerttype("danger");
       }
-    } else {
-      return false;
     }
   };
   setTimeout(() => {
     setalertmsg("");
     setalerttype("");
-  }, 8000);
-
+  }, 4000);
+  const [passvisible, setpassvisible] = useState(false);
   const changevisibility = () => {
     setpassvisible(!passvisible);
   };
-  const changevisibilitynew = () => {
-    setpassvisiblenew(!passvisiblenew);
-  };
+
   const validateemail = (e) => {
     setemail(e.target.value);
     if (!e.target.value) {
-      seterror("Required");
+      seterroremail("Required");
     } else if (
       !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)
     ) {
-      seterror("Invalid email address");
+      seterroremail("Invalid email address");
     } else {
-      seterror("");
+      seterroremail("");
+    }
+  };
+  const validatelname = (e) => {
+    setlastname(e.target.value);
+    if (!e.target.value) {
+      seterrorlname("Please enter your last name");
+    } else {
+      seterrorlname("");
+    }
+  };
+  const validatefname = (e) => {
+    setfirstname(e.target.value);
+    if (!e.target.value) {
+      seterrorfname("Please enter your first name");
+    } else {
+      seterrorfname("");
     }
   };
   const validatepassword = (e) => {
@@ -86,61 +113,66 @@ const PasswordResset = () => {
       seterrorpass("");
     }
   };
-  const validatenewpassword = (e) => {
-    setnewpassword(e.target.value);
-    const uppercaseRegExp = /(?=.*?[A-Z])/;
-    const lowercaseRegExp = /(?=.*?[a-z])/;
-    const digitsRegExp = /(?=.*?[0-9])/;
-    const specialCharRegExp = /(?=.*?[#?!@$%^&*-])/;
-    const minLengthRegExp = /.{8,}/;
-    if (e.target.value === "") {
-      seterrorpassnew("Please enter your password!");
-    } else if (!specialCharRegExp.test(e.target.value)) {
-      seterrorpassnew("At least one Special Characters");
-    } else if (!minLengthRegExp.test(e.target.value)) {
-      seterrorpassnew("At least minumum 8 characters");
-    } else if (!uppercaseRegExp.test(e.target.value)) {
-      seterrorpassnew("At least one Uppercase");
-    } else if (!lowercaseRegExp.test(e.target.value)) {
-      seterrorpassnew("At least one Lowercase");
-    } else if (!digitsRegExp.test(e.target.value)) {
-      seterrorpassnew("At least one digit");
+  const validateconfirmpassword = (e) => {
+    if (!e.target.value) {
+      seterrorconfirmpass("Please enter your password again");
+    } else if (e.target.value !== password) {
+      seterrorconfirmpass("Password must match");
     } else {
-      seterrorpassnew("");
+      seterrorconfirmpass("");
     }
   };
-
   return (
     <>
       <Alert propscontent={{ msg: alertmsg, type: alertype }} />
-
       <div className="container">
-        <div className="screen">
+        <div className="screen" style={{ height: "690px" }}>
           <div className="screen__content">
-            <form className="login">
+            <form className="signup">
               <div className="login__field">
                 <i className="login__icon fa fa-user"></i>
                 <input
                   type="text"
                   className="login__input"
-                  placeholder="User name / Email"
-                  value={email}
-                  onChange={(e) => validateemail(e)}
+                  value={firstname}
+                  placeholder="First Name"
+                  onChange={(e) => validatefname(e)}
                 />
                 <br />
-                {/* {!email && (
-                  <span className="validmsg">Enter a valid email</span>
-                )} */}
-                <span className="validmsg"> {error}</span>
+                <span className="validmsg"> {errorfname}</span>
+              </div>
+              <div className="login__field">
+                <i className="login__icon fa fa-user"></i>
+                <input
+                  type="text"
+                  className="login__input"
+                  value={lastname}
+                  placeholder="Last Name"
+                  onChange={(e) => validatelname(e)}
+                />
+                <br />
+                <span className="validmsg"> {errorlname}</span>
+              </div>
+              <div className="login__field">
+                <i className="login__icon fa fa-envelope"></i>
+                <input
+                  type="text"
+                  className="login__input"
+                  placeholder="User name / Email"
+                  onChange={(e) => validateemail(e)}
+                  value={email}
+                />
+                <br />
+                <span className="validmsg"> {erroremail}</span>
               </div>
               <div className="login__field">
                 <i className="login__icon fa fa-lock"></i>
                 <input
                   type={passvisible ? "text" : "password"}
                   className="login__input"
-                  placeholder="Old Password"
-                  value={password}
+                  placeholder="Password"
                   onChange={(e) => validatepassword(e)}
+                  value={password}
                 />
                 <span>
                   <i
@@ -154,35 +186,23 @@ const PasswordResset = () => {
               <div className="login__field">
                 <i className="login__icon fa fa-lock"></i>
                 <input
-                  type={passvisiblenew ? "text" : "password"}
+                  type="text"
                   className="login__input"
-                  placeholder="New Password"
-                  value={newpassword}
-                  onChange={(e) => validatenewpassword(e)}
+                  placeholder="Confirm Password"
+                  onChange={(e) => validateconfirmpassword(e)}
                 />
-                <span>
-                  <i
-                    className="login__icon fa fa-eye"
-                    onClick={changevisibilitynew}
-                  ></i>
-                </span>
                 <br />
-                <span className="validmsg"> {errorpassnew}</span>
+                <span className="validmsg"> {errorconfirmpass}</span>
               </div>
-
-              <button
-                className="button login__submit"
-                onClick={submitdatalogin}
-              >
-                <span className="button__text">Reset Password</span>
+              <button className="button login__submit" onClick={submitdata}>
+                <span className="button__text">Sign Up Now</span>
                 <i className="button__icon fa fa-chevron-right"></i>
               </button>
-            </form>{" "}
-            <p>
-              <Link to="/login">Return to login</Link>
+            </form>
+            <p style={{ color: "white" }}>
+              Already have account ?<Link to="/login">Login</Link>
             </p>
           </div>
-
           <div className="screen__background">
             <span className="screen__background__shape screen__background__shape4"></span>
             <span className="screen__background__shape screen__background__shape3"></span>
@@ -195,4 +215,4 @@ const PasswordResset = () => {
   );
 };
 
-export default PasswordResset;
+export default SignUp;
