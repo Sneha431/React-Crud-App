@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import logo from "../../assets/img/images.png";
+import { CartState } from "../context/Context";
 const Nav = () => {
   const [visible, setVisible] = useState(false);
-  const [products, setproducts] = useState([]);
+
   const handleToggle = () => {
     setVisible(!visible);
   };
@@ -19,7 +20,9 @@ const Nav = () => {
 
     navigate("/login");
   };
-
+  const {
+    initialState: { products },
+  } = CartState();
   const navigate = useNavigate(); //use to re-render the comp, if any changes found in navigation
 
   return (
@@ -97,7 +100,9 @@ const Nav = () => {
                 <li className="nav-item">
                   <Link className="nav-link" to="/">
                     <i className="fa fa-bell">
-                      <span className="badge badge-info"></span>
+                      <span className="badge badge-info">
+                        {products.length}
+                      </span>
                     </i>
                     Cart
                   </Link>

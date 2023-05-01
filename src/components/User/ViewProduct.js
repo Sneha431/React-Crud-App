@@ -23,7 +23,6 @@ const ViewProduct = () => {
     });
     const json = await result.json();
 
-    console.log(json);
     setname(json.name);
     setprice(json.price);
     setcategory(json.category);

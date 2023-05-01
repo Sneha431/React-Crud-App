@@ -1,31 +1,30 @@
-import React, { useEffect, useState } from "react";
-import jwt_decode from "jwt-decode";
+import React from "react";
+import { CartState } from "../context/Context";
+import { useDispatch, useSelector } from "react-redux";
+import { increment, decrement } from "../context/action";
+
 const CartItem = () => {
-  const [cartdata, setcartdata] = useState([]);
-  useEffect(() => {
-    getcartdata();
-  }, []);
-  const getcartdata = async (e) => {
-    var decoded = jwt_decode(localStorage.getItem("auth"));
-    const userid = decoded.updated_result.id;
-    const result = await fetch(`http://localhost:5000/getcartdata/${userid}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: `bearer ${JSON.parse(localStorage.getItem("auth"))}`,
-      },
-    });
-    const json = await result.json();
-    setcartdata(json);
+  const counter = useSelector((state) => state.cartReducer.count);
+  const {
+    initialState: { products },
+  } = CartState();
+
+  const dispatch = useDispatch();
+  const handleIncrement = () => {
+    dispatch(increment(1));
+    console.log(counter);
   };
 
+  const handleDecrement = () => {
+    dispatch(decrement(1));
+  };
   return (
     <div className="CartContainer">
       <div className="Header">
         <h3 className="Heading">Shopping Cart</h3>
         <h5 className="Action">Remove all</h5>
       </div>
-      {cartdata.map((item, index) => (
+      {products.map((item, index) => (
         <div className="Cart-Items">
           <div className="about">
             <h1 className="title">{item.name}</h1>
@@ -34,9 +33,13 @@ const CartItem = () => {
             </h3>
           </div>
           <div className="counter">
-            <div className="btn">+</div>
-            <div className="count">2</div>
-            <div className="btn">-</div>
+            <div className="btn" onClick={() => handleIncrement()}>
+              +
+            </div>
+            <div>{counter}</div>
+            <div className="btn" onClick={() => handleDecrement()}>
+              -
+            </div>
           </div>
           <div className="prices">
             <div className="amount">{item.price}</div>

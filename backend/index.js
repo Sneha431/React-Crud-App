@@ -321,6 +321,7 @@ app.post("/addtocart", verifytoken, async (req, res) => {
     category: req.body.category,
     company: req.body.company,
   });
+
   if (!resultemail) {
     let cartdata = new Cartdata(req.body);
     let result = await cartdata.save();
