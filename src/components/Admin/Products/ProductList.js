@@ -19,9 +19,9 @@ const ProductList = () => {
     if (localStorage.getItem("auth")) {
       getProducts();
     } else {
-      navigate("/");
+      navigate("/login");
     }
-  }, [offset]);
+  }, []);
 
   const getProducts = async () => {
     let decoded = jwt_decode(localStorage.getItem("auth"));

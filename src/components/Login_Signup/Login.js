@@ -40,13 +40,13 @@ const Login = () => {
     setalertmsg("");
     setalerttype("");
   }, 8000);
-  // useEffect(() => {
-  //   const auth = localStorage.getItem("auth");
+  useEffect(() => {
+    const auth = localStorage.getItem("auth");
 
-  //   if (auth) {
-  //     navigate("/login");
-  //   }
-  // }, []);
+    if (!auth) {
+      navigate("/login");
+    }
+  }, []);
 
   const changevisibility = () => {
     setpassvisible(!passvisible);

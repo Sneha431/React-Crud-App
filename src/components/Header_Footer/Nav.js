@@ -2,27 +2,28 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import logo from "../../assets/img/images.png";
-import { CartState } from "../context/Context";
+// import { CartState } from "../context/Context";
 const Nav = () => {
   const [visible, setVisible] = useState(false);
 
   const handleToggle = () => {
     setVisible(!visible);
   };
-  const auth = localStorage.getItem("auth");
   let decoded = jwt_decode(localStorage.getItem("auth"));
-  console.log("nav" + decoded.updated_result);
+  const role = decoded.updated_result.role;
   const user = decoded.updated_result.id;
   const username = decoded.updated_result.name;
-  const role = decoded.updated_result.role;
   const logout = () => {
-    localStorage.removeItem("auth");
+    if (localStorage.getItem("auth") !== null) {
+      localStorage.removeItem("auth");
 
-    navigate("/login");
+      navigate("/login");
+    }
   };
-  const {
-    initialState: { products },
-  } = CartState();
+
+  // const {
+  //   initialState: { products },
+  // } = CartState();
   const navigate = useNavigate(); //use to re-render the comp, if any changes found in navigation
 
   return (
@@ -79,17 +80,13 @@ const Nav = () => {
                 </li>
                 <li className="nav-item">
                   <Link className="nav-link" to="/add">
-                    <i className="fa fa-plus">
-                      {/* <span className="badge badge-info">11</span> */}
-                    </i>
+                    <i className="fa fa-plus"></i>
                     Add Products
                   </Link>
                 </li>
                 <li className="nav-item">
                   <Link className="nav-link" to="/">
-                    <i className="fa fa-refresh">
-                      {/* <span className="badge badge-info">11</span> */}
-                    </i>
+                    <i className="fa fa-refresh"></i>
                     Update Products
                   </Link>
                 </li>
@@ -101,7 +98,7 @@ const Nav = () => {
                   <Link className="nav-link" to="/">
                     <i className="fa fa-bell">
                       <span className="badge badge-info">
-                        {products.length}
+                        {localStorage.getItem("productlength")}
                       </span>
                     </i>
                     Cart

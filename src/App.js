@@ -20,6 +20,7 @@ import UpdateProduct from "./components/Admin/Products/UpdateProduct";
 import PasswordResset from "./components/Login_Signup/PasswordResset";
 import ViewProduct from "./components/User/ViewProduct";
 import CartItem from "./components/User/CartItem";
+import Cart from "./components/User/Cart";
 const USER_TYPES = {
   PUBLIC_USER: "Public User",
   NORMAL_USER: "Normal User",
@@ -49,7 +50,10 @@ function App() {
               element={
                 <>
                   <Nav />
-                  <CartItem />
+                  <Cart>
+                    <CartItem />
+                  </Cart>
+
                   <Footer />
                 </>
               }

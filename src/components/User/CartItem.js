@@ -1,43 +1,74 @@
-import React from "react";
-import { CartState } from "../context/Context";
-import { useDispatch, useSelector } from "react-redux";
-import { increment, decrement } from "../context/action";
+import React, { useContext } from "react";
+// import { CartState } from "../context/Context";
+
+import { CartContext } from "./Cart";
+import { useEffect } from "react";
 
 const CartItem = () => {
-  const counter = useSelector((state) => state.cartReducer.count);
+  // const counter = useSelector((state) => state.cartReducer.count);
   const {
-    initialState: { products },
-  } = CartState();
+    item,
 
-  const dispatch = useDispatch();
-  const handleIncrement = () => {
-    dispatch(increment(1));
-    console.log(counter);
-  };
+    totalAmount,
+    updatedCart,
+    removeItem,
+    totalItem,
+    totalItems,
+    clearCart,
+    gettotal,
+    increment,
+    decrement,
+    cartquantity,
+  } = useContext(CartContext);
+  // const {
+  //   initialState: { products },
+  // } = CartState();
+  // useEffect(() => {
+  //   gettotal();
+  // }, [gettotal]);
+  const removeAll = async (e) => {
+    e.preventDefault();
 
-  const handleDecrement = () => {
-    dispatch(decrement(1));
+    let result = await fetch("http://localhost:5000/deletecart", {
+      method: "DELETE",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const json = await result.json();
+
+    if (json.result === true) {
+      alert("Cleared");
+      //   setalertmsg("Alert : Cart Cleared");
+    } else {
+      //alert("Enter correct details");
+      //setalertmsg("Alert : Enter correct details");
+      //("danger");
+    }
   };
   return (
     <div className="CartContainer">
       <div className="Header">
         <h3 className="Heading">Shopping Cart</h3>
-        <h5 className="Action">Remove all</h5>
+        <h5 className="Action" onClick={(() => clearCart(item._id), removeAll)}>
+          Remove all
+        </h5>
       </div>
-      {products.map((item, index) => (
+
+      {item.map((item, index) => (
         <div className="Cart-Items">
           <div className="about">
             <h1 className="title">{item.name}</h1>
-            <h3 className="subtitle">
-              {item.company}-{item.category}
-            </h3>
+            <h3 className="subtitle">{item.category}</h3>
           </div>
           <div className="counter">
-            <div className="btn" onClick={() => handleIncrement()}>
+            <div className="btn" onClick={() => increment(item._id)}>
               +
             </div>
-            <div>{counter}</div>
-            <div className="btn" onClick={() => handleDecrement()}>
+            <div>{item.cartquantity}</div>
+            <div className="btn" onClick={() => decrement(item._id)}>
               -
             </div>
           </div>
@@ -46,10 +77,11 @@ const CartItem = () => {
             <div className="save">
               <u>Save for later</u>
             </div>
-            <div className="remove">
+            <div className="remove" onClick={() => removeItem(item._id)}>
               <u>Remove</u>
             </div>
           </div>
+          {/* <div className="total-amount">{item.totalAmount}</div> */}
         </div>
       ))}
 
@@ -58,10 +90,10 @@ const CartItem = () => {
         <div className="total">
           <div>
             <div className="Subtotal">Sub-Total</div>
-            <div className="items">2 items</div>
+            <div className="items">{totalItem} items</div>
           </div>
-          <div className="total-amount">$6.18</div>
         </div>
+        <div className="total-amount">{totalAmount}</div>
         <button className="button">Checkout</button>
       </div>
     </div>

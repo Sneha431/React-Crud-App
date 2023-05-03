@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 require("./db/config");
 const nodemailer = require("nodemailer");
+const fs = require("fs");
+const path = require("path");
 const bcrypt = require("bcrypt");
 // const path = require("path");
 const app = express();
@@ -21,7 +23,7 @@ const jwtkey = process.env.JWT_SECRET_KEY;
 /////session/////
 const session = require("express-session");
 const MongoDBstore = require("connect-mongodb-session")(session);
-console.log(MongoDBstore);
+// console.log(MongoDBstore);
 const store = new MongoDBstore({
   uri: "mongodb://localhost:27017/e-commerce",
   collection: "sessions",
@@ -91,7 +93,7 @@ app.post("/login", async (req, res) => {
         let username = value.name;
         let role = value.role;
 
-        console.log("result" + result);
+        // console.log("result" + result);
         if (result) {
           let updated_result = {
             id: userId,
@@ -167,7 +169,7 @@ app.put("/forgetpassword", async (req, res) => {
             { email: req.body.email, password: result.password },
             { $set: updatedpass }
           );
-          console.log(resultupdated);
+          // console.log(resultupdated);
           if (resultupdated.modifiedCount === 1) {
             res.send({ acknowledged: resultupdated.acknowledged });
           } else {
@@ -199,7 +201,7 @@ app.post("/add-product", verifytoken, async (req, res) => {
 
 app.get("/products/:userid", verifytoken, async (req, res) => {
   let userId = req.params.userid;
-  console.log(userId);
+  // console.log(userId);
   let products = await Products.find({ userId: userId });
   if (products.length > 0) {
     res.send(products);
@@ -278,7 +280,7 @@ app.get("/readcookies", async (req, res) => {
   // res.cookie("newuser", false, { maxAge: 1000 * 24, secure: true });
 
   const cookies = req.cookies;
-  console.log(cookies.newuser);
+  // console.log(cookies.newuser);
 });
 
 /////for outside public///
@@ -309,7 +311,7 @@ app.get("/sendmail", async (req, res) => {
     text: "Hello world?", // plain text body
     html: "<b>Hello world?</b>", // html body
   });
-  console.log("Message sent: %s", info.messageId);
+  // console.log("Message sent: %s", info.messageId);
   res.json(info);
 });
 
@@ -320,11 +322,13 @@ app.post("/addtocart", verifytoken, async (req, res) => {
     price: req.body.price,
     category: req.body.category,
     company: req.body.company,
+    cartquantity: 1,
   });
 
   if (!resultemail) {
     let cartdata = new Cartdata(req.body);
     let result = await cartdata.save();
+
     res.send(result);
   } else {
     res.send({ msg: "Item already added in the cart" });
@@ -332,11 +336,25 @@ app.post("/addtocart", verifytoken, async (req, res) => {
 });
 app.get("/getcartdata/:userid", verifytoken, async (req, res) => {
   let userId = req.params.userid;
-  console.log(userId);
+  // console.log(userId);
   let cartdata = await Cartdata.find({ userId: userId });
+
   if (cartdata.length > 0) {
+    fs.writeFileSync(
+      path.resolve(__dirname, `../src/data.json`),
+      JSON.stringify(cartdata)
+    );
     res.send(cartdata);
+    console.log(cartdata);
   } else {
     res.send({ result: "No Products Found" });
   }
+});
+app.delete("/deletecart", async (req, res) => {
+  const result = await Cartdata.deleteMany({});
+
+  if (result) {
+    fs.writeFileSync(path.resolve(__dirname, `../src/data.json`), data);
+  }
+  res.send(result);
 });

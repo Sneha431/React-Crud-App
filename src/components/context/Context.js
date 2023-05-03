@@ -14,6 +14,7 @@ const Context = ({ children }) => {
   const [cartdata, setcartdata] = useState([]);
   var decoded = jwt_decode(localStorage.getItem("auth"));
   const userid = decoded.updated_result.id;
+
   useEffect(() => {
     // fetch(`http://localhost:5000/getcartdata/${userid}`, {
     //   method: "GET",
