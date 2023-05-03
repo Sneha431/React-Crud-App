@@ -1,12 +1,1 @@
-[
-  {
-    "_id": "64526caf2deb74a4023d959d",
-    "name": "lenovo laptop",
-    "price": "7000",
-    "category": "laptop",
-    "userId": "6447c83548cca5b6b873cf8f",
-    "company": "lenovo",
-    "cartquantity": "1",
-    "__v": 0
-  }
-]
+[{"_id":"64528034db826055788b1c99","name":"dsd","price":"123","category":"dada","userId":"6447c83548cca5b6b873cf8f","company":"adad","cartquantity":"1","__v":0}]

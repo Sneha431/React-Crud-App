@@ -66,21 +66,51 @@ const ViewProduct = () => {
     const json = await result.json();
     console.log(json);
     if (json) {
-      navigate("/shoppingcart");
+      setTimeout(() => {
+        navigate("/shoppingcart");
+      }, 3000);
     } else {
       alert("Enter correct details");
     }
   };
   return (
-    <div className="card">
-      {/* <img src="jeans3.jpg" alt="Denim Jeans" style={{ width: "100%" }} /> */}
-      <h1>{name}</h1>
-      <p className="price">{price}</p>
-      <p>{category}</p>
-      <p>{company}</p>
-      <p>
-        <button onClick={addtocart}>Add to Cart</button>
-      </p>
+    // <div className="card">
+    //   {/* <img src="jeans3.jpg" alt="Denim Jeans" style={{ width: "100%" }} /> */}
+    //   <h1>{name}</h1>
+    //   <p className="price">{price}</p>
+    //   <p>{category}</p>
+    //   <p>{company}</p>
+    //   <p>
+    //     <button onClick={addtocart}>Add to Cart</button>
+    //   </p>
+    // </div>
+
+    <div class="container">
+      <div class="left-column">
+        {/* <img data-image="black" src="images/black.png" alt="" />
+        <img data-image="blue" src="images/blue.png" alt="" />
+        <img data-image="red" class="active" src="images/red.png" alt="" /> */}
+      </div>
+
+      <div class="right-column">
+        <div class="product-description">
+          <h1>{name}</h1>
+          <span>Category-{category}</span>
+          <br></br>
+          <p>Company -{company}</p>
+          <p>
+            The preferred choice of a vast range of acclaimed DJs. Punchy,
+            bass-focused sound and high isolation. Sturdy headband and on-ear
+            cushions suitable for live performance
+          </p>
+        </div>
+
+        <div class="product-price">
+          <span>${price}</span>
+          <br />
+          <button onClick={addtocart}>Add to Cart</button>
+        </div>
+      </div>
     </div>
   );
 };

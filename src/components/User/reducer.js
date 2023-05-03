@@ -65,7 +65,7 @@ const reducer = (state, action) => {
       initialval = initialval + parseInt(cartquantity);
       return initialval;
     }, 0);
-    console.log(totalprice);
+    // console.log(totalprice);
     return { ...state, totalAmount: totalprice, totalItem };
   }
   return state;

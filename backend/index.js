@@ -352,9 +352,13 @@ app.get("/getcartdata/:userid", verifytoken, async (req, res) => {
 });
 app.delete("/deletecart", async (req, res) => {
   const result = await Cartdata.deleteMany({});
+  var array = [];
 
   if (result) {
-    fs.writeFileSync(path.resolve(__dirname, `../src/data.json`), data);
+    fs.writeFileSync(
+      path.resolve(__dirname, `../src/data.json`),
+      JSON.stringify(array)
+    );
   }
   res.send(result);
 });

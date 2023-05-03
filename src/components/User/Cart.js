@@ -25,10 +25,10 @@ const Cart = () => {
 
       .then((data) => {
         //  setproducts(data);
+        dispatch({
+          type: "GET_TOTAL",
+        });
       });
-    dispatch({
-      type: "GET_TOTAL",
-    });
   }, []);
   let return_price = 0;
 

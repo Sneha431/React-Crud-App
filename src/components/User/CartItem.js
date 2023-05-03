@@ -1,9 +1,9 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 // import { CartState } from "../context/Context";
 
 import { CartContext } from "./Cart";
 import { useEffect } from "react";
-
+import jwt_decode from "jwt-decode";
 const CartItem = () => {
   // const counter = useSelector((state) => state.cartReducer.count);
   const {
@@ -48,6 +48,8 @@ const CartItem = () => {
       //("danger");
     }
   };
+  const [products, setproducts] = useState([]);
+
   return (
     <div className="CartContainer">
       <div className="Header">
@@ -58,7 +60,7 @@ const CartItem = () => {
       </div>
 
       {item.map((item, index) => (
-        <div className="Cart-Items">
+        <div className="Cart-Items" key={index}>
           <div className="about">
             <h1 className="title">{item.name}</h1>
             <h3 className="subtitle">{item.category}</h3>
@@ -73,7 +75,7 @@ const CartItem = () => {
             </div>
           </div>
           <div className="prices">
-            <div className="amount">{item.price}</div>
+            <div className="amount">${item.price}</div>
             <div className="save">
               <u>Save for later</u>
             </div>
@@ -84,7 +86,6 @@ const CartItem = () => {
           {/* <div className="total-amount">{item.totalAmount}</div> */}
         </div>
       ))}
-
       <hr />
       <div className="checkout">
         <div className="total">
@@ -93,7 +94,7 @@ const CartItem = () => {
             <div className="items">{totalItem} items</div>
           </div>
         </div>
-        <div className="total-amount">{totalAmount}</div>
+        <div className="total-amount">${totalAmount}</div>
         <button className="button">Checkout</button>
       </div>
     </div>
