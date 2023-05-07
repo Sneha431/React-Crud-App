@@ -10,6 +10,8 @@ const ProductList = () => {
   const [perPage] = useState(2);
   const [pageCount, setPageCount] = useState(0);
   const [products, setproducts] = useState([]);
+  const [productsall, setproductsall] = useState([]);
+
   let decoded = jwt_decode(localStorage.getItem("auth"));
 
   const authrole = decoded.updated_result.role;
@@ -18,10 +20,11 @@ const ProductList = () => {
 
     if (localStorage.getItem("auth")) {
       getProducts();
+      getProductsall();
     } else {
       navigate("/login");
     }
-  }, []);
+  }, [offset]);
 
   const getProducts = async () => {
     let decoded = jwt_decode(localStorage.getItem("auth"));
@@ -35,11 +38,47 @@ const ProductList = () => {
         authorization: `bearer ${JSON.parse(localStorage.getItem("auth"))}`,
       },
     });
-    const json = await result.json();
-    localStorage.setItem("productlength", json.length);
-    const slice = json.slice(offset, offset + perPage);
-    setproducts(slice);
-    setPageCount(Math.ceil(json.length / perPage));
+  
+  
+    if(result===200){
+      const json = await result.json();
+      localStorage.setItem("productlength", json.length);
+      const slice =json.slice(offset, offset + perPage);
+      setproducts(slice);
+      console.log(slice);
+      setPageCount(Math.ceil(json.length / perPage));
+        console.log(offset);
+    }
+
+    
+  };
+  const getProductsall = async () => {
+
+
+
+
+    const result = await fetch('http://localhost:5000/products', {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `bearer ${JSON.parse(localStorage.getItem("auth"))}`,
+      },
+    });
+   console.log(result.status);
+    if(result.status===200){
+      const json = await result.json();
+      localStorage.setItem("productlength", json.length);
+      const slice = json.slice(offset, offset + perPage);
+      setproductsall(slice);
+      console.log(slice);
+      setPageCount(Math.ceil(json.length / perPage));
+        console.log(offset);
+       
+  
+    }
+  
+   
+      
   };
   const deleteproduct = async (id) => {
     console.log(id);
@@ -67,12 +106,15 @@ const ProductList = () => {
     const r = await result.json();
     if (r) {
       setproducts(r);
+      setproductsall(r);
     }
   };
   const handlePageClick = (e) => {
     const selectedPage = e.selected;
     console.log(selectedPage);
     setOffset(selectedPage + 1);
+    
+
   };
   return (
     <ProductListall
@@ -80,8 +122,10 @@ const ProductList = () => {
       searchproduct={searchproduct}
       authrole={authrole}
       products={products}
+      productsall={productsall}
       deleteproduct={deleteproduct}
       pageCount={pageCount}
+   
     />
   );
 };

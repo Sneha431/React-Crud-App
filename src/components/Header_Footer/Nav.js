@@ -15,7 +15,7 @@ const Nav = () => {
   const username = decoded.updated_result.name;
   const logout = () => {
     if (localStorage.getItem("auth") !== null) {
-      localStorage.removeItem("auth");
+      localStorage.clear(); 
 
       navigate("/login");
     }
@@ -98,7 +98,7 @@ const Nav = () => {
                   <Link className="nav-link" to="/">
                     <i className="fa fa-bell">
                       <span className="badge badge-info">
-                        {localStorage.getItem("productlength")}
+                        {localStorage.getItem("cartlength")!==null?localStorage.getItem("cartlength"):0}
                       </span>
                     </i>
                     Cart

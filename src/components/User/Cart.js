@@ -25,9 +25,11 @@ const Cart = () => {
 
       .then((data) => {
         //  setproducts(data);
+        
         dispatch({
           type: "GET_TOTAL",
         });
+        console.log(data.length)
       });
   }, []);
   let return_price = 0;
@@ -46,15 +48,44 @@ const Cart = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const clearCart = () => {
-    return dispatch({ type: "CLEAR_CART" });
+   
+
+    let result =fetch("http://localhost:5000/deletecart", {
+      method: "DELETE",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+  
+
+    if (result) {
+      alert("Cleared");
+      localStorage.setItem("cartlength",0);
+      //   setalertmsg("Alert : Cart Cleared");
+     
+    } else {
+      //alert("Enter correct details");
+      //setalertmsg("Alert : Enter correct details");
+      //("danger");
+    }
+    localStorage.setItem("cartlength",0);
+    return(dispatch({ type: "CLEAR_CART" }),dispatch({ type: "GET_TOTAL" })) ;
+  
   };
 
   const removeItem = (id) => {
     console.log(id);
-    return dispatch({
-      type: "REMOVE_ITEM",
-      payload: id,
-    });
+    return (
+      dispatch({
+        type: "DECREMENT",
+        payload: id,
+      }),
+      dispatch({
+        type: "GET_TOTAL",
+      })
+    );
   };
   // const gettotal = () => {
   //   return dispatch({

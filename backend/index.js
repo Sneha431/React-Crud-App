@@ -25,7 +25,7 @@ const session = require("express-session");
 const MongoDBstore = require("connect-mongodb-session")(session);
 // console.log(MongoDBstore);
 const store = new MongoDBstore({
-  uri: "mongodb://localhost:27017/e-commerce",
+  uri: "mongodb+srv://root:root@crudappreact.caclqzy.mongodb.net/e-commerce?retryWrites=true&w=majority",
   collection: "sessions",
 });
 app.use(
@@ -203,6 +203,15 @@ app.get("/products/:userid", verifytoken, async (req, res) => {
   let userId = req.params.userid;
   // console.log(userId);
   let products = await Products.find({ userId: userId });
+  if (products.length > 0) {
+    res.send(products);
+  } else {
+    res.send({ result: "No Products Found" });
+  }
+});
+app.get("/products", verifytoken, async (req, res) => {
+
+  let products = await Products.find({});
   if (products.length > 0) {
     res.send(products);
   } else {

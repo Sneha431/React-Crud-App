@@ -63,6 +63,7 @@ const ProductListUser = () => {
     const r = await result.json();
     if (r) {
       setproducts(r);
+       setproducts(r);
     }
   };
   const handlePageClick = (e) => {

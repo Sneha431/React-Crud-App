@@ -3,24 +3,28 @@ import ReactPaginate from "react-paginate";
 import { Link } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import Modal from "./Modal";
-
+import loader from "../../assets/img/Iphone-spinner-2.gif";
 const ProductListall = ({
   handlePageClick,
   searchproduct,
   authrole,
   products,
+  productsall,
   deleteproduct,
   pageCount,
+ 
 }) => {
   const [open, setopen] = useState("false");
-
+  const [loading, setloading] = useState(true);
   const [prodId, setprodId] = useState();
   const openModal = (id) => {
     setopen("true");
     setprodId(id);
     console.log(prodId);
   };
-
+setTimeout(() => {
+  setloading(false);
+},1000);
   return (
     <div className="container">
       <div className="table-wrapper">
@@ -44,7 +48,8 @@ const ProductListall = ({
               </tr>
             </thead>
             <tbody>
-              {products.length > 0 ? (
+            <tr><td colSpan={5}>{loading && <img src={loader} alt=""/>}</td></tr>
+                {!loading && products.length > 0 ? (
                 products.map((item, index) => (
                   <tr key={index}>
                     <td>{item.name}</td>
@@ -68,7 +73,7 @@ const ProductListall = ({
                 ))
               ) : (
                 <tr>
-                  <td className="text-center">No Result Found</td>
+                 <td colSpan={5}>{!loading && <span>No Result Found</span>}</td>
                 </tr>
               )}
             </tbody>
@@ -86,8 +91,10 @@ const ProductListall = ({
                 </tr>
               </thead>
               <tbody>
-                {products.length > 0 ? (
-                  products.map((item, index) => (
+              <tr><td colSpan={5}>{loading && <img src={loader} alt=""/>}</td></tr>
+                
+                {!loading && productsall.length > 0 ? (
+                  productsall.map((item, index) => (
                     <tr key={index}>
                       <td>{item.name}</td>
                       <td>${item.price}</td>
@@ -103,7 +110,8 @@ const ProductListall = ({
                   ))
                 ) : (
                   <tr>
-                    <td className="text-center">No Result Found</td>
+                    <td colSpan={5}>{!loading && <span>No Result Found</span>}</td>
+                    
                   </tr>
                 )}
               </tbody>
@@ -118,7 +126,7 @@ const ProductListall = ({
           breakClassName={"break-me"}
           pageCount={pageCount}
           marginPagesDisplayed={2}
-          pageRangeDisplayed={5}
+          pageRangeDisplayed={2}
           onPageChange={handlePageClick}
           containerClassName={"pagination"}
           subContainerClassName={"pages pagination"}

@@ -12,6 +12,7 @@ const ViewProduct = () => {
   const [company, setcompany] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
+    
     getsingleproduct();
     var decoded = jwt_decode(localStorage.getItem("auth"));
     const userid = decoded.updated_result.id;
@@ -25,9 +26,11 @@ const ViewProduct = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+
       });
   }, []);
   const getsingleproduct = async (e) => {
+  
     const result = await fetch(`http://localhost:5000/product/${prodid}`, {
       method: "GET",
       headers: {
@@ -63,12 +66,14 @@ const ViewProduct = () => {
         cartquantity,
       }),
     });
-    const json = await result.json();
-    console.log(json);
-    if (json) {
-      setTimeout(() => {
-        navigate("/shoppingcart");
-      }, 3000);
+    
+    if (result.status===200) {
+      const json = await result.json();
+ if(json)
+ {
+  navigate("/shoppingcart");
+ }
+   
     } else {
       alert("Enter correct details");
     }
