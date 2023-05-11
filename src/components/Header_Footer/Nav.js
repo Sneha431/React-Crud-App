@@ -5,7 +5,7 @@ import logo from "../../assets/img/images.png";
 // import { CartState } from "../context/Context";
 const Nav = () => {
   const [visible, setVisible] = useState(false);
-
+  const [cartlength, setcartlength] = useState(0);
   const handleToggle = () => {
     setVisible(!visible);
   };
@@ -15,7 +15,7 @@ const Nav = () => {
   const username = decoded.updated_result.name;
   const logout = () => {
     if (localStorage.getItem("auth") !== null) {
-      localStorage.clear(); 
+      localStorage.removeItem("auth");
 
       navigate("/login");
     }
@@ -25,7 +25,26 @@ const Nav = () => {
   //   initialState: { products },
   // } = CartState();
   const navigate = useNavigate(); //use to re-render the comp, if any changes found in navigation
+  const getcartdatafunc = () => {
+    let decoded = jwt_decode(localStorage.getItem("auth"));
 
+    const userid = decoded.updated_result.id;
+    fetch(`http://localhost:5000/getcartdata/${userid}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `bearer ${JSON.parse(localStorage.getItem("auth"))}`,
+      },
+    })
+      .then((response) => response.json())
+
+      .then((data) => {
+        setcartlength(data.length);
+      });
+  };
+  useEffect(() => {
+    getcartdatafunc();
+  }, []);
   return (
     <>
       <nav className="navbar navbar-icon-top navbar-expand-lg">
@@ -95,11 +114,9 @@ const Nav = () => {
               <>
                 {" "}
                 <li className="nav-item">
-                  <Link className="nav-link" to="/">
+                  <Link className="nav-link" to="/shoppingcart">
                     <i className="fa fa-bell">
-                      <span className="badge badge-info">
-                        {localStorage.getItem("cartlength")!==null?localStorage.getItem("cartlength"):0}
-                      </span>
+                      <span className="badge badge-info">{cartlength}</span>
                     </i>
                     Cart
                   </Link>

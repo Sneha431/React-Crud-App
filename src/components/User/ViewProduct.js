@@ -12,7 +12,6 @@ const ViewProduct = () => {
   const [company, setcompany] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
-    
     getsingleproduct();
     var decoded = jwt_decode(localStorage.getItem("auth"));
     const userid = decoded.updated_result.id;
@@ -26,11 +25,9 @@ const ViewProduct = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-
       });
   }, []);
   const getsingleproduct = async (e) => {
-  
     const result = await fetch(`http://localhost:5000/product/${prodid}`, {
       method: "GET",
       headers: {
@@ -66,14 +63,13 @@ const ViewProduct = () => {
         cartquantity,
       }),
     });
-    
-    if (result.status===200) {
+
+    if (result.status === 200) {
       const json = await result.json();
- if(json)
- {
-  navigate("/shoppingcart");
- }
-   
+      console.log(json);
+      if (json !== "") {
+        window.location.reload();
+      }
     } else {
       alert("Enter correct details");
     }
@@ -90,15 +86,15 @@ const ViewProduct = () => {
     //   </p>
     // </div>
 
-    <div class="container">
-      <div class="left-column">
+    <div className="container">
+      <div className="left-column">
         {/* <img data-image="black" src="images/black.png" alt="" />
         <img data-image="blue" src="images/blue.png" alt="" />
-        <img data-image="red" class="active" src="images/red.png" alt="" /> */}
+        <img data-image="red" className="active" src="images/red.png" alt="" /> */}
       </div>
 
-      <div class="right-column">
-        <div class="product-description">
+      <div className="right-column">
+        <div className="product-description">
           <h1>{name}</h1>
           <span>Category-{category}</span>
           <br></br>
@@ -110,7 +106,7 @@ const ViewProduct = () => {
           </p>
         </div>
 
-        <div class="product-price">
+        <div className="product-price">
           <span>${price}</span>
           <br />
           <button onClick={addtocart}>Add to Cart</button>

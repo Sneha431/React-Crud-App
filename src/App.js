@@ -1,5 +1,5 @@
 import "./App.css";
-
+import "./assets/css/stylety.css";
 import "./assets/css/nav.css";
 import "./assets/css/cart.css";
 import "./assets/css/footer.css";
@@ -21,6 +21,7 @@ import PasswordResset from "./components/Login_Signup/PasswordResset";
 import ViewProduct from "./components/User/ViewProduct";
 import CartItem from "./components/User/CartItem";
 import Cart from "./components/User/Cart";
+import Thankyou from "./components/User/Thankyou";
 const USER_TYPES = {
   PUBLIC_USER: "Public User",
   NORMAL_USER: "Normal User",
@@ -41,6 +42,16 @@ function App() {
                 <>
                   <Nav />
                   <ProductList />
+                  <Footer />
+                </>
+              }
+            />
+            <Route
+              path="/thank-you"
+              element={
+                <>
+                  <Nav />
+                  <Thankyou />
                   <Footer />
                 </>
               }

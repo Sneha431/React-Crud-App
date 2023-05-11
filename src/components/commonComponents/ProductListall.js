@@ -12,7 +12,6 @@ const ProductListall = ({
   productsall,
   deleteproduct,
   pageCount,
- 
 }) => {
   const [open, setopen] = useState("false");
   const [loading, setloading] = useState(true);
@@ -22,9 +21,9 @@ const ProductListall = ({
     setprodId(id);
     console.log(prodId);
   };
-setTimeout(() => {
-  setloading(false);
-},1000);
+  setTimeout(() => {
+    setloading(false);
+  }, 1000);
   return (
     <div className="container">
       <div className="table-wrapper">
@@ -48,8 +47,10 @@ setTimeout(() => {
               </tr>
             </thead>
             <tbody>
-            <tr><td colSpan={5}>{loading && <img src={loader} alt=""/>}</td></tr>
-                {!loading && products.length > 0 ? (
+              <tr>
+                <td colSpan={5}>{loading && <img src={loader} alt="" />}</td>
+              </tr>
+              {!loading && products.length > 0 ? (
                 products.map((item, index) => (
                   <tr key={index}>
                     <td>{item.name}</td>
@@ -73,7 +74,9 @@ setTimeout(() => {
                 ))
               ) : (
                 <tr>
-                 <td colSpan={5}>{!loading && <span>No Result Found</span>}</td>
+                  <td colSpan={5}>
+                    {!loading && <span>No Result Found</span>}
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -91,8 +94,10 @@ setTimeout(() => {
                 </tr>
               </thead>
               <tbody>
-              <tr><td colSpan={5}>{loading && <img src={loader} alt=""/>}</td></tr>
-                
+                <tr>
+                  <td colSpan={5}>{loading && <img src={loader} alt="" />}</td>
+                </tr>
+
                 {!loading && productsall.length > 0 ? (
                   productsall.map((item, index) => (
                     <tr key={index}>
@@ -110,8 +115,9 @@ setTimeout(() => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5}>{!loading && <span>No Result Found</span>}</td>
-                    
+                    <td colSpan={5}>
+                      {!loading && <span>No Result Found</span>}
+                    </td>
                   </tr>
                 )}
               </tbody>

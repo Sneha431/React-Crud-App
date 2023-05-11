@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const { check, validationResult } = require("express-validator");
 require("./db/config");
 const nodemailer = require("nodemailer");
 const fs = require("fs");
@@ -25,7 +26,8 @@ const session = require("express-session");
 const MongoDBstore = require("connect-mongodb-session")(session);
 // console.log(MongoDBstore);
 const store = new MongoDBstore({
-  uri: "mongodb+srv://root:root@crudappreact.caclqzy.mongodb.net/e-commerce?retryWrites=true&w=majority",
+  // uri: "mongodb://localhost:27017/e-commerce",
+  uri: "mongodb://localhost:27017/e-commerce",
   collection: "sessions",
 });
 app.use(
@@ -45,39 +47,53 @@ var cookieParser = require("cookie-parser");
 app.use(cookieParser());
 /////
 
-app.post("/register", async (req, res) => {
-  // let resultp = await User.findOne(JSON.parse(req.body.email));
-  // console.log(resultp);
-
-  let resultemail = await User.findOne({ email: req.body.email });
-  if (resultemail) {
-    res.send({ msg: "Email ID already exists" });
-  } else {
-    const salt = await bcrypt.genSalt(10);
-    const passwordupdated = await bcrypt.hash(req.body.password, salt);
-    let updated_body = {
-      name: req.body.name,
-      email: req.body.email,
-      password: passwordupdated,
-      role: "user",
-    };
-    let user = new User(updated_body);
-    let result = await user.save();
-    result = result.toObject();
-    delete result.password;
-    if (result) {
-      jwt.sign({ result }, jwtkey, { expiresIn: "2h" }, (err, token) => {
-        if (err) {
-          res.send({ msg: "something went wrong" });
-        } else {
-          res.send({ result, auth: token });
-        }
-      });
+app.post(
+  "/register",
+  [
+    check("name", "Name length should be 10 to 20 characters").isLength({
+      min: 10,
+      max: 20,
+    }),
+    check("email").isEmail().withMessage("Please enter a valid email"),
+  ],
+  async (req, res) => {
+    // let resultp = await User.findOne(JSON.parse(req.body.email));
+    // console.log(resultp);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.json({ msg: errors.array()[0].msg });
     } else {
-      res.send({ msg: "something went wrong" });
+      let resultemail = await User.findOne({ email: req.body.email });
+      if (resultemail) {
+        res.send({ msg: "Email ID already exists" });
+      } else {
+        const salt = await bcrypt.genSalt(10);
+        const passwordupdated = await bcrypt.hash(req.body.password, salt);
+        let updated_body = {
+          name: req.body.name,
+          email: req.body.email,
+          password: passwordupdated,
+          role: "user",
+        };
+        let user = new User(updated_body);
+        let result = await user.save();
+        result = result.toObject();
+        delete result.password;
+        if (result) {
+          jwt.sign({ result }, jwtkey, { expiresIn: "2h" }, (err, token) => {
+            if (err) {
+              res.send({ msg: "something went wrong" });
+            } else {
+              res.send({ result, auth: token });
+            }
+          });
+        } else {
+          res.send({ msg: "something went wrong" });
+        }
+      }
     }
   }
-});
+);
 
 app.post("/login", async (req, res) => {
   let resultemail = await User.find({ email: req.body.email });
@@ -189,29 +205,20 @@ app.post("/add-product", verifytoken, async (req, res) => {
   let result = await product.save();
   res.send(result);
 });
-// app.get("/products", verifytoken, async (req, res) => {
-//   let products = await Products.find();
+app.get("/products", verifytoken, async (req, res) => {
+  let products = await Products.find();
 
-//   if (products.length > 0) {
-//     res.send(products);
-//   } else {
-//     res.send({ result: "No Products Found" });
-//   }
-// });
-
-app.get("/products/:userid", verifytoken, async (req, res) => {
-  let userId = req.params.userid;
-  // console.log(userId);
-  let products = await Products.find({ userId: userId });
   if (products.length > 0) {
     res.send(products);
   } else {
     res.send({ result: "No Products Found" });
   }
 });
-app.get("/products", verifytoken, async (req, res) => {
 
-  let products = await Products.find({});
+app.get("/products/:userid", verifytoken, async (req, res) => {
+  let userId = req.params.userid;
+  // console.log(userId);
+  let products = await Products.find({ userId: userId });
   if (products.length > 0) {
     res.send(products);
   } else {
@@ -356,7 +363,12 @@ app.get("/getcartdata/:userid", verifytoken, async (req, res) => {
     res.send(cartdata);
     console.log(cartdata);
   } else {
-    res.send({ result: "No Products Found" });
+    var array = [];
+
+    fs.writeFileSync(
+      path.resolve(__dirname, `../src/data.json`),
+      JSON.stringify(array)
+    );
   }
 });
 app.delete("/deletecart", async (req, res) => {
@@ -370,4 +382,33 @@ app.delete("/deletecart", async (req, res) => {
     );
   }
   res.send(result);
+});
+app.put("/updatecartqty/:id/:type", verifytoken, async (req, res) => {
+  if (req.params.type === "inc") {
+    let cartqty = {
+      cartquantity: parseInt(req.body.cartquantity) + parseInt(1),
+    };
+    let result = await Cartdata.updateOne(
+      { _id: req.params.id },
+      { $set: cartqty }
+    );
+    res.send(result);
+  } else {
+    if (req.params.type === "dec") {
+      let cartqty = {
+        cartquantity: parseInt(req.body.cartquantity) - parseInt(1),
+      };
+      let result = await Cartdata.updateOne(
+        { _id: req.params.id },
+        { $set: cartqty }
+      );
+      res.send(result);
+    }
+  }
+});
+app.delete("/deletecartdata/:id", async (req, res) => {
+  const result = await Cartdata.deleteOne({ _id: req.params.id });
+  if (result) {
+    res.send(result);
+  }
 });

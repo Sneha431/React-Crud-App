@@ -19,7 +19,6 @@ const CartItem = () => {
     increment,
     decrement,
     cartquantity,
-    
   } = useContext(CartContext);
   // const {
   //   initialState: { products },
@@ -27,53 +26,59 @@ const CartItem = () => {
   // useEffect(() => {
   //   gettotal();
   // }, [gettotal]);
-  // const removeAll = async (e) => {
-  //   e.preventDefault();
+  const removeAll = async (e) => {
+    e.preventDefault();
 
-  //   let result = await fetch("http://localhost:5000/deletecart", {
-  //     method: "DELETE",
+    let result = await fetch("http://localhost:5000/deletecart", {
+      method: "DELETE",
 
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //   });
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  //   const json = await result.json();
+    const json = await result.json();
+    console.log(json);
+    if (json) {
+      alert("Cleared");
+      window.location.reload();
+      //   setalertmsg("Alert : Cart Cleared");
+    } else {
+      //alert("Enter correct details");
+      //setalertmsg("Alert : Enter correct details");
+      //("danger");
+    }
+  };
 
-  //   if (json) {
-  //     alert("Cleared");
-  //     localStorage.setItem("cartlength",0);
-  //     //   setalertmsg("Alert : Cart Cleared");
-  //   } else {
-  //     //alert("Enter correct details");
-  //     //setalertmsg("Alert : Enter correct details");
-  //     //("danger");
-  //   }
-  // };
   const [products, setproducts] = useState([]);
 
   return (
     <div className="CartContainer">
       <div className="Header">
         <h3 className="Heading">Shopping Cart</h3>
-        <h5 className="Action" onClick={(() => clearCart(item._id))}>
+        <h5 className="Action" onClick={(() => clearCart(item._id), removeAll)}>
           Remove all
         </h5>
       </div>
 
-      { localStorage.setItem("cartlength",item.length) }{!item && <p>Cart is Empty</p>}{item && item.map((item, index) => (
-       
+      {item.map((item, index) => (
         <div className="Cart-Items" key={index}>
           <div className="about">
             <h1 className="title">{item.name}</h1>
             <h3 className="subtitle">{item.category}</h3>
           </div>
           <div className="counter">
-            <div className="btn" onClick={() => increment(item._id)}>
+            <div
+              className="btn"
+              onClick={() => increment(item._id, item.cartquantity)}
+            >
               +
             </div>
             <div>{item.cartquantity}</div>
-            <div className="btn" onClick={() => decrement(item._id)}>
+            <div
+              className="btn"
+              onClick={() => decrement(item._id, item.cartquantity)}
+            >
               -
             </div>
           </div>
@@ -98,7 +103,10 @@ const CartItem = () => {
           </div>
         </div>
         <div className="total-amount">${totalAmount}</div>
-        <button className="button">Checkout</button>
+
+        <a href="/thank-you">
+          <button className="button">Checkout</button>
+        </a>
       </div>
     </div>
   );
