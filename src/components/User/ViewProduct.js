@@ -10,6 +10,7 @@ const ViewProduct = () => {
   const [price, setprice] = useState("");
   const [category, setcategory] = useState("");
   const [company, setcompany] = useState("");
+  const [image, setimage] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
     getsingleproduct();
@@ -38,6 +39,7 @@ const ViewProduct = () => {
     const json = await result.json();
 
     setname(json.name);
+    setimage(json.imagename);
     setprice(json.price);
     setcategory(json.category);
     setcompany(json.company);
@@ -87,12 +89,11 @@ const ViewProduct = () => {
     // </div>
 
     <div className="container">
-      <div className="left-column">
-        {/* <img data-image="black" src="images/black.png" alt="" />
-        <img data-image="blue" src="images/blue.png" alt="" />
-        <img data-image="red" className="active" src="images/red.png" alt="" /> */}
+      <div>
+        {" "}
+        <img src={image} alt="" data-image="blue" />
       </div>
-
+      <br></br>
       <div className="right-column">
         <div className="product-description">
           <h1>{name}</h1>

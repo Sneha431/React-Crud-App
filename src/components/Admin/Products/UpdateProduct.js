@@ -4,9 +4,10 @@ const UpdateProduct = () => {
   const [name, setname] = useState("");
   const [price, setprice] = useState("");
   const [category, setcategory] = useState("");
+  const [imagename, setimagename] = useState("");
   const [company, setcompany] = useState("");
   const [error, seterror] = useState(false);
-
+  const [image, setImage] = useState({ preview: "", data: "" });
   const navigate = useNavigate();
   const params = useParams();
   const prodid = params.id;
@@ -22,13 +23,21 @@ const UpdateProduct = () => {
       },
     });
     const json = await result.json();
-
+    setimagename(json.imagename);
     setname(json.name);
     setprice(json.price);
     setcategory(json.category);
     setcompany(json.company);
   };
-
+  const handleFileChange = (e) => {
+    let img = {
+      preview: URL.createObjectURL(e.target.files[0]),
+      data: e.target.files[0],
+    };
+    console.log(img);
+    setImage(img.preview);
+    // setimagename(img.data);
+  };
   const updateProduct = async (e) => {
     e.preventDefault();
     if (!name || !price || !category || !company) {
@@ -40,7 +49,13 @@ const UpdateProduct = () => {
 
     const result = await fetch(`http://localhost:5000/update/${prodid}`, {
       method: "PUT",
-      body: JSON.stringify({ name, price, category, company }),
+      body: JSON.stringify({
+        name,
+        price,
+        category,
+        company,
+        imagename: image,
+      }),
       headers: {
         "Content-Type": "application/json",
         authorization: `bearer ${JSON.parse(localStorage.getItem("auth"))}`,
@@ -54,6 +69,7 @@ const UpdateProduct = () => {
       alert("Something went wrong");
     }
   };
+
   return (
     <div className="form-style-5">
       <form>
@@ -96,8 +112,11 @@ const UpdateProduct = () => {
           {error && !company && (
             <span className="error">Enter a valid company</span>
           )}
+          <input type="file" name="files" onChange={handleFileChange} />
+          {/* <input type="text" value={image.data} name="imagename" /> */}
         </fieldset>
-
+        <img src={imagename} alt="" />
+        <img src={image.preview} alt="" />
         <input type="submit" value="Update" onClick={updateProduct} />
       </form>
     </div>

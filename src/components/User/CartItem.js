@@ -1,11 +1,14 @@
 import React, { useContext, useState } from "react";
 // import { CartState } from "../context/Context";
-
+import { useNavigate, createSearchParams } from "react-router-dom";
 import { CartContext } from "./Cart";
 import { useEffect } from "react";
 import jwt_decode from "jwt-decode";
+
 const CartItem = () => {
+  const navigate = useNavigate();
   // const counter = useSelector((state) => state.cartReducer.count);
+  const [checkoutdata, setcheckoutdata] = useState([]);
   const {
     item,
 
@@ -26,6 +29,7 @@ const CartItem = () => {
   // useEffect(() => {
   //   gettotal();
   // }, [gettotal]);
+  const random = require("random-string-alphanumeric-generator");
   const removeAll = async (e) => {
     e.preventDefault();
 
@@ -49,8 +53,71 @@ const CartItem = () => {
       //("danger");
     }
   };
+  useEffect(() => {
+    var decoded = jwt_decode(localStorage.getItem("auth"));
+    localStorage.setItem("total", totalAmount);
+    const userid = decoded.updated_result.id;
+    fetch(`http://localhost:5000/getcartdata/${userid}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `bearer ${JSON.parse(localStorage.getItem("auth"))}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setcheckoutdata(data);
+      });
+  }, []);
+  const orderid = random.randomHex(10);
+  const submitcheckout = async (e) => {
+    e.preventDefault();
+    const result = await fetch("http://localhost:5000/submitcheckoutfunc", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `bearer ${JSON.parse(localStorage.getItem("auth"))}`,
+      },
+      body: JSON.stringify({
+        checkoutdata,
+        orderID: orderid,
+      }),
+    });
+    console.log(result);
+    if (result.status === 200) {
+      // navigate({
+      //   pathname: "/thank-you",
+      //   search: `?orderid=${createSearchParams(orderid)}`,
+      // });
+      navigate({
+        pathname: "/thank-you",
+        search: createSearchParams({
+          orderid: orderid,
+        }).toString(),
+      });
+    }
+    // var decoded = jwt_decode(localStorage.getItem("auth"));
+    // const userid = decoded.updated_result.id;
+    // fetch(`http://localhost:5000/getcartdata/${userid}`, {
+    //   method: "GET",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     authorization: `bearer ${JSON.parse(localStorage.getItem("auth"))}`,
+    //   },
+    // })
+    //   .then((response) => response.json())
+    //   .then((data) =>
+    //     // fetch("http://localhost:5000/submitcheckout", {
+    //     //   method: "POST",
 
-  const [products, setproducts] = useState([]);
+    //     //   headers: {
+    //     //     "Content-Type": "application/json",
+    //     //     authorization: `bearer ${JSON.parse(localStorage.getItem("auth"))}`,
+    //     //   },
+    //     //   body: data,
+    //     // })
+    //   );
+  };
 
   return (
     <div className="CartContainer">
@@ -104,7 +171,7 @@ const CartItem = () => {
         </div>
         <div className="total-amount">${totalAmount}</div>
 
-        <a href="/thank-you">
+        <a href="" onClick={submitcheckout}>
           <button className="button">Checkout</button>
         </a>
       </div>

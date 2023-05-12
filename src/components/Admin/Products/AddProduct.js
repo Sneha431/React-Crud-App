@@ -4,12 +4,23 @@ import jwt_decode from "jwt-decode";
 const AddProduct = () => {
   const [name, setname] = useState("");
   const [price, setprice] = useState("");
+
   const [category, setcategory] = useState("");
   const [company, setcompany] = useState("");
   const [error, seterror] = useState(false);
-
+  const [image, setImage] = useState({ preview: "", data: "" });
   const navigate = useNavigate();
+  const handleFileChange = (e) => {
+    let img = {
+      preview: URL.createObjectURL(e.target.files[0]),
+      data: e.target.files[0],
+    };
+    console.log(img);
+    setImage(img.preview);
+    // setimagename(img.data);
+  };
   const addProduct = async (e) => {
+    console.log(image);
     e.preventDefault();
     if (!name || !price || !category || !company) {
       seterror(true);
@@ -28,7 +39,14 @@ const AddProduct = () => {
         "Content-Type": "application/json",
         authorization: `bearer ${JSON.parse(localStorage.getItem("auth"))}`,
       },
-      body: JSON.stringify({ name, price, category, company, userId }),
+      body: JSON.stringify({
+        name,
+        price,
+        category,
+        company,
+        userId,
+        imagename: image,
+      }),
     });
     const json = await result.json();
     console.log(json);
@@ -40,9 +58,10 @@ const AddProduct = () => {
 
     /////
   };
+
   return (
     <div className="form-style-5">
-      <form>
+      <form enctype="multipart/form-data">
         <fieldset>
           <legend>
             <span className="number">1</span> Product Info
@@ -78,9 +97,14 @@ const AddProduct = () => {
             value={company}
             onChange={(e) => setcompany(e.target.value)}
           />
+
           {error && !company && (
             <span className="error">Enter a valid company</span>
           )}
+
+          <input type="file" name="files" onChange={handleFileChange} />
+          {/* <input type="text" value={image.data} name="imagename" /> */}
+          <img src={image.preview} alt="" />
         </fieldset>
 
         <input type="submit" value="Add" onClick={addProduct} />

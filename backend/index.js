@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const fileUpload = require("express-fileupload");
 const { check, validationResult } = require("express-validator");
 require("./db/config");
 const nodemailer = require("nodemailer");
@@ -8,12 +9,14 @@ const path = require("path");
 const bcrypt = require("bcrypt");
 // const path = require("path");
 const app = express();
+app.use(express.static("public"));
 app.use(express.json());
 app.use(cors());
-
+app.use(fileUpload());
 const User = require("./db/User");
 const Products = require("./db/Product");
 const Cartdata = require("./db/Cartdata");
+const Checkoutdata = require("./db/Checkoutdata");
 // Set up Global configuration access
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
@@ -204,6 +207,24 @@ app.post("/add-product", verifytoken, async (req, res) => {
   let product = new Products(req.body);
   let result = await product.save();
   res.send(result);
+  //  const imagevar = req.body.image;
+  // var imagevar = req.body.image;
+  // // // If no image submitted, exit
+  // // if (!image) return res.sendStatus(400);
+  // // Move the uploaded image to our upload folder
+  // var uploadPath = path.resolve(
+  //   __dirname,
+  //   "../src/assets/img/productsImg/" + req.body.image.data
+  // );
+  // //console.log(uploadPath) gives nothing ;
+  // imagevar.mv(uploadPath, (err) => {
+  //   if (err) {
+  //     return res.status(500).send(err);
+  //   }
+  //   // let result = await product.save();
+  //   // res.send(result);
+  // });
+  // const localPath = "../src/assets/img/productsImg/";
 });
 app.get("/products", verifytoken, async (req, res) => {
   let products = await Products.find();
@@ -341,6 +362,7 @@ app.post("/addtocart", verifytoken, async (req, res) => {
     cartquantity: 1,
   });
 
+  console.log(req.body);
   if (!resultemail) {
     let cartdata = new Cartdata(req.body);
     let result = await cartdata.save();
@@ -361,7 +383,6 @@ app.get("/getcartdata/:userid", verifytoken, async (req, res) => {
       JSON.stringify(cartdata)
     );
     res.send(cartdata);
-    console.log(cartdata);
   } else {
     var array = [];
 
@@ -411,4 +432,27 @@ app.delete("/deletecartdata/:id", async (req, res) => {
   if (result) {
     res.send(result);
   }
+});
+app.post("/submitcheckoutfunc", async (req, res) => {
+  // const checkoutdata = new Checkoutdata(req.body);
+  let updated_body = {
+    Checkoutdata: req.body.checkoutdata,
+    orderID: req.body.orderID,
+  };
+  console.log(updated_body);
+
+  const options = { ordered: true };
+  const result = await Checkoutdata.insertMany(updated_body, options);
+
+  const result1 = await Cartdata.deleteMany({});
+  var array = [];
+
+  if (result1) {
+    fs.writeFileSync(
+      path.resolve(__dirname, `../src/data.json`),
+      JSON.stringify(array)
+    );
+  }
+
+  res.send(result.orderID);
 });

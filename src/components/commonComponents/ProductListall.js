@@ -98,8 +98,8 @@ const ProductListall = ({
                   <td colSpan={5}>{loading && <img src={loader} alt="" />}</td>
                 </tr>
 
-                {!loading && productsall.length > 0 ? (
-                  productsall.map((item, index) => (
+                {!loading && products.length > 0 ? (
+                  products.map((item, index) => (
                     <tr key={index}>
                       <td>{item.name}</td>
                       <td>${item.price}</td>
