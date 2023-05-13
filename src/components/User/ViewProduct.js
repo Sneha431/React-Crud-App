@@ -10,7 +10,7 @@ const ViewProduct = () => {
   const [price, setprice] = useState("");
   const [category, setcategory] = useState("");
   const [company, setcompany] = useState("");
-  const [image, setimage] = useState("");
+  const [image, setimage] = useState(null);
   const navigate = useNavigate();
   useEffect(() => {
     getsingleproduct();
@@ -90,8 +90,8 @@ const ViewProduct = () => {
 
     <div className="container">
       <div>
-        {" "}
-        <img src={image} alt="" data-image="blue" />
+        {image!==null && <img src={require(`../../assets/img_uploads/${image}`)} alt="" data-image="blue"/>} 
+
       </div>
       <br></br>
       <div className="right-column">

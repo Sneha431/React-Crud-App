@@ -42,9 +42,9 @@ const Nav = () => {
         setcartlength(data.length);
       });
   };
-  useEffect(() => {
-    getcartdatafunc();
-  }, []);
+  // useEffect(() => {
+  //   getcartdatafunc();
+  // }, []);
   return (
     <>
       <nav className="navbar navbar-icon-top navbar-expand-lg">

@@ -10,6 +10,7 @@ const bcrypt = require("bcrypt");
 // const path = require("path");
 const app = express();
 app.use(express.static("public"));
+const multer = require('multer');
 app.use(express.json());
 app.use(cors());
 app.use(fileUpload());
@@ -26,23 +27,23 @@ const jwtkey = process.env.JWT_SECRET_KEY;
 
 /////session/////
 const session = require("express-session");
-const MongoDBstore = require("connect-mongodb-session")(session);
-// console.log(MongoDBstore);
-const store = new MongoDBstore({
-  // uri: "mongodb://localhost:27017/e-commerce",
-  uri: "mongodb://localhost:27017/e-commerce",
-  collection: "sessions",
-});
-app.use(
-  session({
-    secret: "my secret",
-    resave: true,
+// const MongoDBstore = require("connect-mongodb-session")(session);
 
-    saveUninitialized: true,
-    store: store,
-  })
-);
-/////session/////
+// const store = new MongoDBstore({
+//   // uri: "mongodb://localhost:27017/e-commerce",
+//   uri: "mongodb+srv://root:root@crudappreact.caclqzy.mongodb.net/e-commerce?retryWrites=true&w=majority",
+//   collection: "sessions",
+// });
+// app.use(
+//   session({
+//     secret: "my secret",
+//     resave: true,
+
+//     saveUninitialized: true,
+//     store: store,
+//   })
+// );
+// /////session/////
 
 ////cookies///
 var cookieParser = require("cookie-parser");
@@ -207,24 +208,8 @@ app.post("/add-product", verifytoken, async (req, res) => {
   let product = new Products(req.body);
   let result = await product.save();
   res.send(result);
-  //  const imagevar = req.body.image;
-  // var imagevar = req.body.image;
-  // // // If no image submitted, exit
-  // // if (!image) return res.sendStatus(400);
-  // // Move the uploaded image to our upload folder
-  // var uploadPath = path.resolve(
-  //   __dirname,
-  //   "../src/assets/img/productsImg/" + req.body.image.data
-  // );
-  // //console.log(uploadPath) gives nothing ;
-  // imagevar.mv(uploadPath, (err) => {
-  //   if (err) {
-  //     return res.status(500).send(err);
-  //   }
-  //   // let result = await product.save();
-  //   // res.send(result);
-  // });
-  // const localPath = "../src/assets/img/productsImg/";
+console.log(req.body);
+ 
 });
 app.get("/products", verifytoken, async (req, res) => {
   let products = await Products.find();
@@ -455,4 +440,27 @@ app.post("/submitcheckoutfunc", async (req, res) => {
   }
 
   res.send(result.orderID);
+});
+
+app.post('/upload', (req, res) => {
+  // Get the file that was set to our field named "image"
+
+  // const { image } = req.files;
+
+  // If no image submitted, exit
+  if (!req.files.data) return res.sendStatus(400);
+
+  // If does not have image mime type prevent from uploading
+  // if (/^image/.test(image.mimetype)) return res.sendStatus(400);
+
+  // Move the uploaded image to our upload folder
+
+  req.files.data.mv(path.resolve(__dirname,`../src/assets/img_uploads/`+ req.files.data.name));
+
+  // All good
+ res.sendStatus(200);
+
+//  res.send({ msg: `../../../assets/img_uploads/`+ req.files.data.name});
+
+
 });

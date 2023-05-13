@@ -4,16 +4,55 @@ const UpdateProduct = () => {
   const [name, setname] = useState("");
   const [price, setprice] = useState("");
   const [category, setcategory] = useState("");
-  const [imagename, setimagename] = useState("");
+
+  const [imagename, setimagename] = useState("No_Image_Available.jpg");
+  // const [imagenameupt, setimagenameupt] = useState(null);
   const [company, setcompany] = useState("");
   const [error, seterror] = useState(false);
-  const [image, setImage] = useState({ preview: "", data: "" });
+  const [image, setImage] = useState("");
   const navigate = useNavigate();
   const params = useParams();
   const prodid = params.id;
   useEffect(() => {
     getsingleproduct();
   }, []);
+  // const handleFileChange = (e) => {
+  //   let img = {
+  //     preview: URL.createObjectURL(e.target.files[0]),
+  //     data: e.target.files[0].name,
+  //   };
+  //   console.log(img);
+  //   setimagename(img.preview);
+
+
+  //       }
+  const submitimage = async(e)=>{
+    e.preventDefault();
+    var data = new FormData();
+    var imagedata = document.querySelector('input[type="file"]').files[0];
+    data.append("data", imagedata);
+    setImage(imagedata.name);
+   
+   
+    fetch("http://localhost:5000/upload", {
+      mode: 'no-cors',
+      method: "POST",
+      body: data
+    }).then(function (res) {
+      console.log(res);
+   
+      // if (res.ok) {
+      //   alert("Perfect! ");
+       
+      
+      
+      // } else if (res.status === 401) {
+      //   alert("Oops! ");
+      // }
+    }, function (e) {
+      alert("Error submitting form!");
+    });
+  }
   const getsingleproduct = async (e) => {
     const result = await fetch(`http://localhost:5000/product/${prodid}`, {
       method: "GET",
@@ -23,21 +62,24 @@ const UpdateProduct = () => {
       },
     });
     const json = await result.json();
-    setimagename(json.imagename);
+    
+    setimagename(json.imagename ? json.imagename :"No_Image_Available.jpg");
     setname(json.name);
     setprice(json.price);
     setcategory(json.category);
     setcompany(json.company);
   };
-  const handleFileChange = (e) => {
-    let img = {
-      preview: URL.createObjectURL(e.target.files[0]),
-      data: e.target.files[0],
-    };
-    console.log(img);
-    setImage(img.preview);
-    // setimagename(img.data);
-  };
+  // const handleFileChange = (e) => {
+  //   console.log("URL"+URL);
+  //   let img = {
+  //     preview: URL.createObjectURL(e.target.files[0]),
+  //     data: e.target.files[0],
+  //   };
+  //   console.log(img);
+  //   //setImage(img.preview);
+  //   setimagenameupt(img.preview);
+  //   // setimagenameupt(img.data);
+  // };
   const updateProduct = async (e) => {
     e.preventDefault();
     if (!name || !price || !category || !company) {
@@ -54,7 +96,7 @@ const UpdateProduct = () => {
         price,
         category,
         company,
-        imagename: image,
+        imagename:image,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -64,6 +106,7 @@ const UpdateProduct = () => {
     const json = await result.json();
     console.log(json);
     if (json) {
+
       navigate("/");
     } else {
       alert("Something went wrong");
@@ -112,11 +155,18 @@ const UpdateProduct = () => {
           {error && !company && (
             <span className="error">Enter a valid company</span>
           )}
-          <input type="file" name="files" onChange={handleFileChange} />
-          {/* <input type="text" value={image.data} name="imagename" /> */}
+        
+          {/* <input type="text" value={image.data} name="imagenameupt" /> */}
+          <div>
+       
+          <img src={require(`../../../assets/img_uploads/${imagename}`)} alt=""  height={200}/>
+          </div>
+         
+          <input type="file" name="image" />
+          
+          <button onClick={submitimage}>Upload</button>
         </fieldset>
-        <img src={imagename} alt="" />
-        <img src={image.preview} alt="" />
+   
         <input type="submit" value="Update" onClick={updateProduct} />
       </form>
     </div>
